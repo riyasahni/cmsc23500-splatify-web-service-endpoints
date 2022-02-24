@@ -40,12 +40,12 @@ In a new terminal, while the server is running, run from the client directory `p
 This test will add two albums, where 1 artist overlaps.
 
 ### Test 2.3 
-In a new terminal, while the server is running, run from the client directory be able to run the following scripts 
+In a new terminal, while the server is running, run from the project directory root run the following scripts
 
 ```
-python3 client.py -f data/add-10album.json
-python3 client.py -f data/add-50album.json
-python3 client.py -f data/add-fullalbum.json
+python3 client/client.py -f data/album10-test.json
+python3 client/client.py -f data/album50-test.json
+python3 client/client.py -f data/albumfull-test.json
 ```
 
 These tests add increasingly more albums. 
