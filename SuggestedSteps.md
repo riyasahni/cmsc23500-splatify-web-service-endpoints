@@ -1,5 +1,5 @@
 # Suggested Steps
-These are the suggested steps for completing this project. Note (2/21/22) we will add more tests by the end of the week for the remaining 
+These are the suggested steps for completing this project. 
 
 ## Step 1 Configure DB
 Look through the end point/API description in the link above and first design you ERD. Create your API using any tool you want (including paper and taking picture with your camera), but get your ERD diagram in the splatify/ folder and call it `splat2.{png|pdf|jpg}`.  You must use the notation we use in class. The exception to this is if you use [draw.io/](https://draw.io/).  The default ER-diagram is not our format, but you can change the edges and relationships to align with our style. Using their PK notation is fine, but remove FKs from entities. The updated ER-diagram should reflect how data enters the system (i.e. think about how songs are created).
@@ -98,7 +98,7 @@ python3 client/client.py -f data/full/full-3.2.json
 
 
 ## Step 4: 
-Complete the remaining APIs. This includes the end points get for getting albums and getting artist details, along with the three analytic end points. The documentation linked shows expected output. 
+Complete the remaining APIs. This includes the end points get for getting albums and getting artist details, along with the three analytic end points. The documentation linked shows expected output.  These tests run multiple checks, so you may want to duplicate and modify a test, or inspect an endpoint by hand first.
 
 The tests below for the 'full data set' will allow you test each endpoint.
 
