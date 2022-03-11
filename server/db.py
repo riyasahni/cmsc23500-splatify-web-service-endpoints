@@ -71,7 +71,6 @@ class DB:
             self.conn.executescript(f.read())
         return "{\"message\":\"created\"}"
 
-
     # Add an album to the DB
     # An album has details, a list of artists, and a list of songs
     # If the artist or songs already exist then they should not be created
@@ -98,6 +97,13 @@ class DB:
         c = self.conn.cursor()
         # TODO milestone splat
         # If your code successfully inserts the data
+
+        # check that the album id is unique
+
+
+        # list(artists.keys())[list(artists.values()).index(artist)]
+        
+
         # return "{\"message\":\"album inserted\"}"
 
 
