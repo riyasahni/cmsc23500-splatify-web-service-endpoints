@@ -93,18 +93,56 @@ class DB:
         if isinstance(songs, list) is False or isinstance(artists, list) is False:
             logging.error("song_ids or artist_ids are not lists")
             raise BadRequest("song_ids or artist_ids are not lists")
+        # check if song has artist associated with it
+        
         
         c = self.conn.cursor()
         # TODO milestone splat
         # If your code successfully inserts the data
 
-        # check that the album id is unique
+        # check that the artist doesn't already exist
 
+        # insert album information
+        insert_album_info = """INSERT INTO album_table (album_id, album_name, release_year)
+                        VALUES (?, ?, ?)"""
+        c.execute(insert_album_info, [album_id, album_name, release_year])
+
+        # insert artists info based on artist_id
+        insert_artists_info = """INSERT INTO artist_album_table (artist_id, album_id)
+                        VALUES (?, ?)"""
+        # check if album has at least one artist
+        if artists == None:
+            logging.error("album needs to have at least 1 artist")
+            raise BadRequest("album needs to have at least 1 artist")
+
+        for artist in artists:
+            artist_id = artist["artist_id"]
+            c.execute(insert_artists_info, [album_id, artist_id])
+
+        # insert songs info based on song_id
+        insert_songs_info = """INSERT INTO song_album_table (song_id, album_id)
+                        VALUES (?, ?)"""
+
+        # check if album has at least one song
+        if songs == None:
+            logging.error("album needs to have at least 1 song")
+            raise BadRequest("album needs to have at least 1 song")
+
+        for song in songs:
+            # raise error if song does not have artist associated
+            s_artists = song.get("artists")
+            if s_artists == None:
+                logging.error("song does not have associated artist")
+                raise BadRequest("song does not have associated artist")
+
+            song_id = song["song_id"]
+            c.execute(insert_songs_info, [album_id, song_id])
 
         # list(artists.keys())[list(artists.values()).index(artist)]
         
+        self.conn.commit()
 
-        # return "{\"message\":\"album inserted\"}"
+        return "{\"message\":\"album inserted\"}"
 
 
 
