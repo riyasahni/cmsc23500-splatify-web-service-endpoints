@@ -15,7 +15,7 @@ create table song_table (
 create table artist_table (
     artist_id INTEGER PRIMARY KEY,
     artist_name VARCHAR(255) NOT NULL,
-    artist_country VARCHAR(255)
+    country VARCHAR(255)
 );
 
 create table album_table (
