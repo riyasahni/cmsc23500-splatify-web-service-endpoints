@@ -93,23 +93,15 @@ class DB:
         if isinstance(songs, list) is False or isinstance(artists, list) is False:
             logging.error("song_ids or artist_ids are not lists")
             raise BadRequest("song_ids or artist_ids are not lists")
-        # check if song has artist associated with it
-        
-        
-        c = self.conn.cursor()
-        # TODO milestone splat
-        # If your code successfully inserts the data
 
-        # check that the artist doesn't already exist
+        # check if song has artist associated with it
+        c = self.conn.cursor()
 
         # insert album information
-        insert_album_info = """INSERT INTO album_table (album_id, album_name, release_year)
+        insert_album_info = """INSERT OR IGNORE INTO album_table (album_id, album_name, release_year)
                         VALUES (?, ?, ?)"""
         c.execute(insert_album_info, [album_id, album_name, release_year])
 
-        # insert artists info based on artist_id
-        insert_artists_info = """INSERT INTO artist_album_table (artist_id, album_id)
-                        VALUES (?, ?)"""
         # check if album has at least one artist
         if artists == None:
             logging.error("album needs to have at least 1 artist")
@@ -117,34 +109,42 @@ class DB:
 
         for artist in artists:
             artist_id = artist["artist_id"]
-            c.execute(insert_artists_info, [album_id, artist_id])
-
-        # insert songs info based on song_id
-        insert_songs_info = """INSERT INTO song_album_table (song_id, album_id)
-                        VALUES (?, ?)"""
-
+            insert_artists_info = """INSERT OR IGNORE INTO artist_album_table (artist_id, album_id) VALUES (?, ?)"""
+            c.execute(insert_artists_info, [artist_id, album_id])
+    
         # check if album has at least one song
         if songs == None:
             logging.error("album needs to have at least 1 song")
             raise BadRequest("album needs to have at least 1 song")
 
         for song in songs:
+
+            song_id = song["song_id"]
+            song_name = song["song_name"]
+            song_length = song["length"]
+
             # raise error if song does not have artist associated
             s_artists = song.get("artists")
             if s_artists == None:
                 logging.error("song does not have associated artist")
                 raise BadRequest("song does not have associated artist")
+            
+            for artist in s_artists:
+                a_id = artist["artist_id"]
+                # insert songs_artist info
+                insert_songs_artist_info = """INSERT OR IGNORE INTO song_artist_table (song_id, artist_id) VALUES (?, ?)"""
+                c.execute(insert_songs_artist_info, [song_id, a_id])
 
-            song_id = song["song_id"]
-            c.execute(insert_songs_info, [album_id, song_id])
-
-        # list(artists.keys())[list(artists.values()).index(artist)]
+            # insert songs info
+            insert_song_info = """INSERT or IGNORE INTO song_table (song_id, song_name, song_length) VALUES (?, ?, ?)"""
+            c.execute(insert_song_info, [song_id, song_name, song_length])
+            # insert songs info based on song_id
+            insert_songs_album_info = """INSERT INTO song_album_table (song_id, album_id) VALUES (?, ?)"""
+            c.execute(insert_songs_album_info, [song_id, album_id])
         
         self.conn.commit()
 
         return "{\"message\":\"album inserted\"}"
-
-
 
     """
     Returns a song's info
@@ -152,11 +152,62 @@ class DB:
     """
     def find_song(self, song_id):
         c = self.conn.cursor()
-        # Your query should fetch (song_id, name, length, artist_name, album_name) based on song_id
-        # TODO milestone splat
-        res = to_json(c)
+        # Your query should fetch (song_id, name, length, artist_ids, album_ids) based on song_id
+        
+        # fill up this object type, which I'll return in the end:
+        result = {}
+        # select the album information
+        select_song_info = """SELECT song_id, song_name, song_length
+                              FROM song_table
+                              WHERE song_id =""" + str(song_id)
+        c.execute(select_song_info)
+        # write the album info into json format
+        res_song_info = to_json(c)
+        if len(res_song_info) == 0:
+            logging.error("song with song_id is not found")
+            raise KeyNotFound(message="song with song_id is not found")
+        # select the artist ids
+        select_song_artist_info = """SELECT artist_id
+                              FROM song_artist_table
+                              WHERE song_id =""" + str(song_id) + """ ORDER BY artist_id"""
+        c.execute(select_song_artist_info)
+        # write the artist ids into json format
+        res_artist_ids = to_json(c)
+        if len(res_artist_ids) == 0:
+            logging.error("no artists associated with song")
+            raise KeyNotFound(message="no artists associated with song")
+        # convert the list of dictionaries into a list
+        list_of_artist_ids = []
+        for x in res_artist_ids:
+            val = x["artist_id"]
+            list_of_artist_ids.append(val)
+        
+        # select the album ids
+        select_song_album_info =  """SELECT album_id, song_id
+                              FROM song_album_table
+                              WHERE song_id =""" + str(song_id) + """ ORDER BY album_id"""""
+        c.execute(select_song_album_info)
+        # write the album ids into json format
+        res_album_ids = to_json(c)
+        # print(res_album_ids)
+        if len(res_album_ids) == 0:
+            logging.error("no albums associated with song")
+            raise KeyNotFound(message="no albums associated with song")
+        list_of_album_ids = []
+        for x in res_album_ids:
+            val = x["album_id"]
+            list_of_album_ids.append(val)
+        print(list_of_artist_ids)
+        print(list_of_album_ids)
+        result["song_id"] = res_song_info[0]["song_id"]
+        result["song_name"] = res_song_info[0]["song_name"]
+        result["length"] = res_song_info[0]["song_length"]
+        result["artist_ids"] = list_of_artist_ids
+        result["album_ids"] = list_of_album_ids
+
         self.conn.commit()
-        return res
+        return result
+
 
     """
     Returns all an album's songs
@@ -165,7 +216,7 @@ class DB:
     def find_songs_by_album(self, album_id):
 
         c = self.conn.cursor()
-        # Your query should fetch (song_id, name, length, artist name, album name) based on album_id
+        # Your query should fetch (song_id, name, length, artist id, album id) based on album_id
         # TODO milestone splat
         res = to_json(c)
         self.conn.commit()
@@ -177,7 +228,7 @@ class DB:
     """
     def find_songs_by_artist(self, artist_id):
         c = self.conn.cursor()
-        # Your query should fetch (song_id, name, length, artist name, album name) based on artist_id
+        # Your query should fetch (song_id, name, length, artist id, album id) based on artist_id
         # TODO milestone splat
         res = to_json(c)
         self.conn.commit()

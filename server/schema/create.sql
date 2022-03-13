@@ -47,5 +47,3 @@ create table song_artist_table (
     FOREIGN KEY(artist_id) REFERENCES song_table(song_id),
     UNIQUE(song_id, artist_id)
 );
--- some sample records
--- insert into test_table values ('abcde', 10), ('adkhe',12), ('badae', 3);
