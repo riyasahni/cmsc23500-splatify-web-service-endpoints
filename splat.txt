@@ -1,0 +1,10 @@
+I've completed all the parts of Splatify! I spent roughly 15 hours on this project. The
+function that I got the most stuck on was the last one (top_length), because I had initially
+thought of a really complicated way to sort through all of the song lengths and then somehow
+also sort through the corresponding artist_names, and it was really messy and not working 
+syntax-wise. Then, I remembered that I could actually just do all of my filtering and stuff in
+the SQL query itself, as we have been practicing in all of the homeworks! This made my life a lot
+easier, and the function now also looks a lot cleaner. I realize I could do the same for the avg_length 
+function, but I don't feel like re-writing it, and it works. I also struggled the most with earlier 
+functions as I was trying to get used to the project, but once I understood what to do and how things
+worked, the remaining functions were not that difficult to complete at all.

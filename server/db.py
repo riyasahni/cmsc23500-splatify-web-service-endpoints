@@ -111,7 +111,6 @@ class DB:
             artist_id = artist["artist_id"]
             insert_artists_info = """INSERT OR IGNORE INTO artist_album_table (artist_id, album_id) VALUES (?, ?)"""
             c.execute(insert_artists_info, [artist_id, album_id])
-            #############################################################
             artist_name = artist["artist_name"]
             country = artist["country"]
             # insert artists info
@@ -119,7 +118,6 @@ class DB:
                                (artist_id, artist_name, country)
                                VALUES (?, ?, ?)"""
             c.execute(insert_artist_info, [artist_id, artist_name, country])
-            #############################################################
 
         # check if album has at least one song
         if songs == None:
@@ -546,7 +544,17 @@ class DB:
     """
     def top_length(self, num_artists):
         c = self.conn.cursor()
-        # TODO milestone splat
+
+        select_top_len = """SELECT artist_id, SUM(song_length) as total_length
+                              FROM artist_table
+                              NATURAL JOIN song_artist_table
+                              NATURAL JOIN song_table
+                              GROUP BY artist_id
+                              ORDER BY total_length DESC, artist_name ASC
+                              LIMIT """ + str(num_artists)
+        
+        c.execute(select_top_len)
+        
         res = to_json(c)
         self.conn.commit()
         return res
